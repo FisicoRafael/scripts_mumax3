@@ -1,0 +1,45 @@
+Msat  = 800e3
+Aex   = 13e-12
+
+// define exchange length
+lex := sqrt(13e-12 / (0.5 * mu0 * pow(1000e3 ,2)))
+
+d     := 30 * lex                        // we test for d/lex = 30
+Sizex := 5*d                             // magnet size x
+Sizey := 1*d
+Sizez := 0.1*d
+
+nx := pow(2, ilogb(Sizex / (0.75*lex)))  // power-of-two number of cells
+ny := pow(2, ilogb(Sizey / (0.75*lex)))  // not larger than 0.75 exchange lengths
+
+SetGridSize(nx, ny, 1)
+SetCellSize(Sizex/nx, Sizey/ny, Sizez)
+
+m = randomMag()
+relax()         // high-energy states best minimized by relax()
+
+Bmax  := 100.0e-3
+Bstep :=  1.0e-3
+MinimizerStop = 1e-6
+TableAdd(B_ext)
+
+for B:=0.0; B<=Bmax; B+=Bstep{
+    B_ext = vector(B, 0, 0)
+    relax()   
+    save(m) 
+    tablesave()
+}
+
+for B:=Bmax; B>=-Bmax; B-=Bstep{
+    B_ext = vector(B, 0, 0)
+    relax()
+    save(m)
+    tablesave()
+}
+
+for B:=-Bmax; B<=Bmax; B+=Bstep{
+    B_ext = vector(B, 0, 0)
+    relax()
+    save(m)   
+    tablesave()
+}
